@@ -28,20 +28,25 @@ const LoginPage = () => {
         username,
         password,
       });
+
       const { token } = response.data; // Extract the token from the API response
         
-      console.log("Response",response.data);
+      console.log("Response-----",response);
       
       // Set the token in cookies
       Cookies.set('authToken', token, { 
         expires: 1, // Cookie expiration in days  
         sameSite: 'Strict', // SameSite attribute
       });
-        
-      localStorage.setItem('username', response?.data?.feature?.username); // Store username in localStorage
+        // Safe to use browser-specific APIs like localStorage
+        localStorage.setItem('username', response?.data?.data?.user?.username); // Store username in localStorage
+      
 
       // Handle successful authentication
       toast.success('Login successful!');
+      if(response?.data?.data?.user?.Roles[0]?.name=="IFA"){
+         
+      }
       router.push('/dashboard'); // Redirect to dashboard on success
     } catch (error) {
       // Handle server and network errors
