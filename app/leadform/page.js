@@ -38,6 +38,7 @@ const FormPage = () => {
     // Process the form data (submit it to an API or handle validation)
     console.log(formData)
 
+
     // Reset form fields after submission
     setFormData({
       name: '',
@@ -52,19 +53,23 @@ const FormPage = () => {
 <div className="max-h-[20%] bg-gray-100 flex flex-col">
   {/* Navbar Section */}
   <div
-    className="w-full bg-gray-600 text-white flex justify-between items-center p-2 fixed top-0 left-0 right-0 z-10"
+  className="w-full bg-gradient-to-r from-gray-700 to-gray-900 text-white flex justify-between items-center p-4 fixed top-0 left-0 right-0 z-20 shadow-lg"
   >
-    <div className="text-xl">Dashboard</div>
-    <div className="flex items-center">
-      <span className="mr-4">{username}</span>
-      <button
-        onClick={handleLogout}
-        className="py-2 px-4 bg-gray-800 text-white rounded-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-      >
-        Logout
-      </button>
-    </div>
+  {/* Title */}
+  <div className="text-2xl font-semibold tracking-wide">Dashboard</div>
+  
+  {/* User Info */}
+  <div className="flex items-center space-x-4">
+    <span className="font-medium text-sm text-gray-300">{username}</span>
+    <button
+      onClick={handleLogout}
+      className="py-2 px-4 bg-blue-600 text-white rounded-lg hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-400 transition duration-200 shadow-md"
+    >
+      Logout
+    </button>
   </div>
+</div>
+
 
   {/* Form Section */}
   <div className="flex items-center justify-center pt-20"> {/* Added pt-20 to give space for the fixed navbar */}
@@ -107,7 +112,6 @@ const FormPage = () => {
             value={formData.mobile}
             onChange={handleChange}
             placeholder="Enter your mobile number"
-            pattern="[0-9]{10}"
             required
             className="mt-2 w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
           />
