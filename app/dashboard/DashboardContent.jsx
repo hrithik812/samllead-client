@@ -1,13 +1,52 @@
 'use client'
-import React from 'react';
+import React, { useEffect,useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Cookies from 'js-cookie';
+import Image from 'next/image';
+import Table from '../components/Table';
+import axios from 'axios';
 
 const DashboardContent = () => {
   const router = useRouter();
+  const [userInfo,setUserInfo]=useState("");
+  const [tableData,setTableData]=useState("")
+  const getUserId=()=>{
+    const userJson = localStorage.getItem('userInfo');
+    
+ // Parse the JSON string to get the object
+ if (userJson) {
 
+   const userInfo = JSON.parse(userJson);
+
+   getTableInfo(userInfo?.userId);
+
+   setUserInfo(userInfo)
+ } else {
+   console.log('No user found in localStorage');
+ }
+  }
+  const getTableInfo=async(userId)=>{
+    console.log("user id----",userId);
+    
+
+     try {
+      console.log("user id----",userId);
+
+    const response = await axios.get(`http://localhost:5000/ifa/clientInfo/${userId}`);
+    console.log("reponse data---",response);
+    
+    setTableData(response?.data?.data[0]?.clientInfo)
+  } catch (error) {
+    console.error('Error fetching data:', error.message);
+    // Handle specific error response
+  }
+}
+console.log("table data---",tableData);
+
+  useEffect(()=>{
+    getUserId();
+  },[])
   // Get the username from localStorage
-  const username = localStorage.getItem('username');
 
   // Logout function to clear user data
   const handleLogout = () => {
@@ -18,17 +57,7 @@ const DashboardContent = () => {
     // Redirect to login page
     router.push('/');
   };
-  const generateIframeSrc = (username) => {
-    if (username === 'ceo') {
-      return 'https://app.powerbi.com/view?r=eyJrIjoiNDcxYTUzNTMtZDgxOC00NWQyLTgzZmYtYzhiYmU5N2NhMjg4IiwidCI6ImE3MTQzNzA2LTkwZjEtNDM3NS1iZjdhLTU2NWRkZTMxOTgxZCIsImMiOjEwfQ%3D%3D';
-    } else if (username === 'coo') {
-      return 'https://app.powerbi.com/view?r=eyJrIjoiNDk0NmQ1ZWItMDQ5NC00YTk1LTgyNDEtNzExNjJmMmQ5NTg0IiwidCI6ImE3MTQzNzA2LTkwZjEtNDM3NS1iZjdhLTU2NWRkZTMxOTgxZCIsImMiOjEwfQ%3D%3D';
-    } else if (username=="dgm") {
-      return 'https://app.powerbi.com/view?r=eyJrIjoiNWNkNjIxYjQtMDM3OC00ZThhLTk5MGUtZjUzYTJiMzM4NGRkIiwidCI6ImE3MTQzNzA2LTkwZjEtNDM3NS1iZjdhLTU2NWRkZTMxOTgxZCIsImMiOjEwfQ%3D%3D';
-    }
-  };
 
-  const iframeSrc = generateIframeSrc(username);
   return (
     <div
       style={{
@@ -40,58 +69,39 @@ const DashboardContent = () => {
       }}
     >
       {/* Navbar */}
-      <div
-        style={{
-          width: "100%",
-        //   padding: "10px 20px",
-          backgroundColor: "#808080", // Dark background for the navbar
-          color: "#fff", // White text color
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-        }}
+  <div className="w-full bg-gradient-to-r from-gray-800 to-black text-white flex justify-between items-center px-4 py-2 fixed top-0 left-0 right-0 z-20 shadow-lg border-b border-gray-700">
+    {/* Logo & Title */}
+    <div className="flex items-center space-x-2">
+  <Image
+    src="/images.png"
+    alt="Shanta Asset Management Limited"
+    width={20}
+    height={20}
+    className="filter invert hue-rotate-180"
+  />
+  </div>
+
+    {/* Navigation Links */}
+    <div className="hidden md:flex space-x-4">
+      <a href="#home" className="text-gray-300 hover:text-white text-xs font-medium transition duration-200">Home</a>
+      <a href="#about" className="text-gray-300 hover:text-white text-xs font-medium transition duration-200">About</a>
+      <a href="#contact" className="text-gray-300 hover:text-white text-xs font-medium transition duration-200">Contact</a>
+    </div>
+
+    {/* User Info */}
+    <div className="flex items-center space-x-2">
+      <span className="font-medium text-xs text-gray-300 hidden sm:block">{userInfo?.userName}</span>
+      <button
+        onClick={handleLogout}
+        className="py-1 px-3 bg-blue-600 text-white text-xs rounded-lg hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-400 transition duration-200 shadow-md"
       >
-        <div style={{ fontSize: "18px" }}>Dashboard</div>
-        <div style={{ display: "flex", alignItems: "center" }}>
-          <span style={{ marginRight: "10px" }}>{username}</span>
-          <button
-            onClick={handleLogout}
-            style={{
-              padding: "5px 10px",
-              backgroundColor: "#36454F", // Red background for logout
-              border: "none",
-              color: "#fff",
-              cursor: "pointer",
-              borderRadius: "5px",
-            }}
-          >
-            Logout
-          </button>
-        </div>
-      </div>
+        Logout
+      </button>
+    </div>
+  </div>
 
       {/* Main Content */}
-      <div
-        style={{
-          width: "100%",
-          height: "calc(100vh - 50px)", // Make space for the navbar
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-        }}
-      >
-        
-        <iframe
-          title="Unit1"
-          style={{
-            width: "100%", // Full width of parent container
-            height: "100%", // Full height of parent container
-            border: "none", // Removes border for a clean look
-          }}
-          src={iframeSrc}
-          allowFullScreen
-        ></iframe>
-      </div>
+ <Table data={tableData}/>
     </div>
   );
 };
