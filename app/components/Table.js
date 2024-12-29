@@ -1,25 +1,48 @@
-import React, { useState } from 'react';
+'use client'
+import axios from 'axios';
+import React, { useState, useEffect } from 'react';
 import { useTable, useSortBy, useGlobalFilter } from 'react-table';
 
 const columns = [
-    { Header: 'ID', accessor: 'id' },
-    { Header: 'Name', accessor: 'name' },
-    { Header: 'MobileNo', accessor: 'mobileno' },  
-    { Header: 'Email', accessor: 'email' },
-    { Header:'Occupation',accessor:'occupation'},
-    { Header:'Address',accessor:'address'}
-  
-  ];
-const Table = ({ data = [] }) => { // Default to empty array if no data is passed
-    console.log("Data----",data);
-    
+  { Header: 'ID', accessor: 'id' },
+  { Header: 'Name', accessor: 'name' },
+  { Header: 'MobileNo', accessor: 'mobileno' },
+  { Header: 'Email', accessor: 'email' },
+  { Header: 'Occupation', accessor: 'occupation' },
+  { Header: 'Address', accessor: 'address' },
+];
+
+const Table = () => {
   const [filterInput, setFilterInput] = useState('');
-  
-  // Ensure that the data passed to the table is an array
-  if (!Array.isArray(data)) {
-    console.error('Data passed to Table is not an array');
-    return <div>Error: Data should be an array</div>;
-  }
+  const [data, setData] = useState([]);
+  const [userInfo, setUserInfo] = useState('');
+
+  const getUserId = () => {
+    const userJson = localStorage.getItem('userInfo');
+
+    // Parse the JSON string to get the object
+    if (userJson) {
+      const userInfo = JSON.parse(userJson);
+      getTableInfo(userInfo?.userId);
+      setUserInfo(userInfo);
+    } else {
+      console.log('No user found in localStorage');
+    }
+  };
+
+  const getTableInfo = async (userId) => {
+    try {
+      const response = await axios.get(`http://localhost:5000/ifa/clientInfo/${userId}`);
+      console.log('Response data---', response);
+      setData(response?.data?.data[0]?.clientInfo || []);
+    } catch (error) {
+      console.error('Error fetching data:', error.message);
+    }
+  };
+
+  useEffect(() => {
+    getUserId();
+  }, []);
 
   const {
     getTableProps,
@@ -30,8 +53,8 @@ const Table = ({ data = [] }) => { // Default to empty array if no data is passe
     setGlobalFilter,
   } = useTable(
     {
-      columns,  // Column definitions remain the same
-      data,     // Pass the data prop to the useTable hook
+      columns,
+      data,
     },
     useGlobalFilter,
     useSortBy
@@ -60,9 +83,10 @@ const Table = ({ data = [] }) => { // Default to empty array if no data is passe
         <table {...getTableProps()} className="min-w-full bg-white border border-gray-300 shadow-lg rounded-lg">
           <thead className="bg-blue-600 text-white">
             {headerGroups.map((headerGroup) => (
-              <tr {...headerGroup.getHeaderGroupProps()}>
+              <tr key={headerGroup.id} {...headerGroup.getHeaderGroupProps()}>
                 {headerGroup.headers.map((column) => (
                   <th
+                    key={column.id}
                     {...column.getHeaderProps(column.getSortByToggleProps())}
                     className="py-3 px-6 text-left font-semibold text-sm cursor-pointer"
                   >
@@ -82,13 +106,17 @@ const Table = ({ data = [] }) => { // Default to empty array if no data is passe
           <tbody {...getTableBodyProps()}>
             {rows.map((row) => {
               prepareRow(row);
+              const { key, ...rowProps } = row.getRowProps();
               return (
-                <tr {...row.getRowProps()} className="hover:bg-gray-100 transition duration-200">
-                  {row.cells.map((cell) => (
-                    <td {...cell.getCellProps()} className="py-3 px-6 border-b text-sm text-gray-700">
-                      {cell.render('Cell')}
-                    </td>
-                  ))}
+                <tr key={key} {...rowProps} className="hover:bg-gray-100 transition duration-200">
+                  {row.cells.map((cell) => {
+                    const { key: cellKey, ...cellProps } = cell.getCellProps();
+                    return (
+                      <td key={cellKey} {...cellProps} className="py-3 px-6 border-b text-sm text-gray-700">
+                        {cell.render('Cell')}
+                      </td>
+                    );
+                  })}
                 </tr>
               );
             })}

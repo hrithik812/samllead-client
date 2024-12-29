@@ -25,15 +25,9 @@ const DashboardContent = () => {
    console.log('No user found in localStorage');
  }
   }
-  const getTableInfo=async(userId)=>{
-    console.log("user id----",userId);
-    
-
+  const getTableInfo=async(userId)=>{    
      try {
-      console.log("user id----",userId);
-
     const response = await axios.get(`http://localhost:5000/ifa/clientInfo/${userId}`);
-    console.log("reponse data---",response);
     
     setTableData(response?.data?.data[0]?.clientInfo)
   } catch (error) {
@@ -41,8 +35,6 @@ const DashboardContent = () => {
     // Handle specific error response
   }
 }
-console.log("table data---",tableData);
-
   useEffect(()=>{
     getUserId();
   },[])
@@ -101,7 +93,7 @@ console.log("table data---",tableData);
   </div>
 
       {/* Main Content */}
- <Table data={tableData}/>
+ <Table />
     </div>
   );
 };
